@@ -76,6 +76,7 @@ export default class App extends React.Component{
                     style={{height:10}}
                     thumbStyle={{width:5,height:5}}
                     minimumTrackTintColor='green'
+                    maximumTrackTintColor='white'
                     />
               </View>
           </View>
@@ -142,9 +143,9 @@ showsHorizontalScrollIndicator={false}
       </View>
 
       <View style={styles.operation}>
-          <View style={styles.operation_button}><Text style={styles.operation_text}>SKIP ></Text></View>
-          <View style={styles.operation_button}><Text style={styles.operation_text}>REMARK</Text></View>
-          <View style={styles.operation_button}><Text style={styles.operation_text}>NEXT ></Text></View>
+         <TouchableOpacity style={styles.operation_button} onPress={() => alert('skip')}><View ><Text style={styles.operation_text}>SKIP ></Text></View></TouchableOpacity>
+          <TouchableOpacity style={styles.operation_button} onPress={() => alert('remark')}><View ><Text style={styles.operation_text}>REMARK</Text></View></TouchableOpacity>
+          <TouchableOpacity style={styles.operation_button} onPress={() => alert('next')}><View ><Text style={styles.operation_text}>NEXT ></Text></View></TouchableOpacity> 
       </View>
 
     </View>
@@ -208,7 +209,7 @@ const styles = StyleSheet.create({
     height:'10%',
     width:'100%',
     flexDirection:'row',
-    alignItems:'center'
+    alignItems:'center',
   },
 
   seeker:{
@@ -239,6 +240,7 @@ const styles = StyleSheet.create({
   seeker_bar:{
     height:'40%',
     width:'100%',
+    paddingLeft:5,
   },
 
   num_text:{
