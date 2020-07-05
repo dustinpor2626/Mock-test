@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View ,Slider, ScrollView, TouchableOpacity} from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity} from 'react-native';
+import Slider from 'react-native-slider';
 import Countdown from 'react-native-countdown-component';
 
 export default class App extends React.Component{
@@ -18,13 +19,13 @@ export default class App extends React.Component{
         options:['1','2','3','4'],
       }
     ]
-  }
+  } 
 
 
   getColor = (index) => {
 
     if(this.state.selected_option_index == index)
-      return 'red'
+      return 'rgba(60,179,113,0.8)'
       else
         return 'white'
   }
@@ -33,11 +34,20 @@ export default class App extends React.Component{
   Attempted_ques_Color = (index) => {
 
     if(index < this.state.current_ques_number)
-      return 'wheat'
+      return 'rgba(0,0,128,0.9)'
       else if(index == this.state.jump_ques_num)
-        return 'gray'
+        return 'rgba(211,211,211,0.9)'
         else
-        return 'silver'
+        return 'rgba(211,211,211,0.4)'
+
+  }
+
+  getnumtextcolor = (index) => {
+
+    if(index < this.state.current_ques_number)
+      return 'white'
+      else
+      return 'blue'
 
   }
 
@@ -55,13 +65,18 @@ export default class App extends React.Component{
       <View style={styles.timer_container}>
           <View style={styles.seeker}>
               <View style={styles.seeker_text}>
-                  <Text>{this.state.current_ques_number}/20 Question</Text>
+                  <Text style={{color:'rgba(0,0,128,0.9)',fontSize:18,fontWeight:'bold'}}>{this.state.current_ques_number}/{this.state.ques_num.length} Question</Text>
               </View>
               <View style={styles.seeker_bar} >
                   <Slider
-                    thumbTintColor='red'
-                    disabled='true'
-                  />
+                    value={this.state.current_ques_number/this.state.ques_num.length}
+                    thumbTintColor='yellow'
+                    disabled={true}
+                    thumbTintColor='white'
+                    style={{height:10}}
+                    thumbStyle={{width:5,height:5}}
+                    minimumTrackTintColor='green'
+                    />
               </View>
           </View>
 
@@ -69,9 +84,12 @@ export default class App extends React.Component{
           <View style={styles.timer_box}>
                    <Countdown
                     until={10*60}
-                    size={15} 
+                    onFinish={() => alert('Time out')}
                     timeToShow={['M','S']}
                     timeLabels={{m:'',s:''}}
+                    digitStyle={{backgroundColor: ''}}
+                    digitTxtStyle={{color: 'rgba(0,0,128,0.9)',fontSize:20,fontWeight:'bold'}}
+                    digitStyle={{width:25}}
                     showSeparator
                   />
             </View>
@@ -89,7 +107,7 @@ showsHorizontalScrollIndicator={false}
             <TouchableOpacity
             onPress={() => this.setState({jump_ques_num:index})}>
             <View style={[styles.num_text,{backgroundColor:this.Attempted_ques_Color(index)}]}>
-                <Text>{data}</Text>
+                <Text style={{color:this.getnumtextcolor(index),fontSize:18,fontWeight:'bold'}}>{data}</Text>
             </View>
             </TouchableOpacity>
           );
@@ -99,7 +117,7 @@ showsHorizontalScrollIndicator={false}
       </View>
 
       <View style={styles.ques}>
-        <View style={{height:50}}><Text style={{fontSize:25,color:'white',fontWeight:'bold'}}>Question  {this.state.current_ques_number}</Text></View>
+        <View style={{height:50}}><Text style={{fontSize:25,color:'rgb(0,0,128)',fontWeight:'bold'}}>Question  {this.state.current_ques_number}</Text></View>
       <Text style={styles.ques_text}>{this.state.data[this.state.selected_ques_index].ques}</Text>
       </View>
 
@@ -114,8 +132,8 @@ showsHorizontalScrollIndicator={false}
             style={{width:'85%',height:40,marginBottom:15,marginTop:5}}
             >
           <View style={[styles.opt_list_container,{backgroundColor:this.getColor(index)}]}>
-            <Text style={{color:'blue',fontSize:20}}>{String.fromCharCode(65 + index)}.</Text>
-            <View style={{marginLeft:10}}><Text style={{color:'blue',fontSize:15}}>{data}</Text></View> 
+            <Text style={{color:'rgba(0,0,128,1)',fontSize:20}}>{String.fromCharCode(65 + index)}.</Text>
+            <View style={{marginLeft:10}}><Text style={{color:'rgba(0,0,128,0.9)',fontSize:15}}>{data}</Text></View> 
           </View>
           </TouchableOpacity>
           );
@@ -150,40 +168,37 @@ const styles = StyleSheet.create({
   },
 
   header_text:{
-    color:'wheat',
-    fontSize:30,
+    color:'white',
+    fontSize:35,
     fontWeight:'bold',
   },
 
   timer_container:{
     height:'10%',
     width:'100%',
-    backgroundColor:'gray',
+    backgroundColor:'rgba(211,211,211,0.4)',
     flexDirection:'row',
   },
 
   number:{
     height:'7%',
     width:'100%',
-    backgroundColor:'yellow',
     flexDirection:'row',
     alignItems:'center'
   },
 
   ques:{
     width:'100%',
-    backgroundColor:'blue',
     padding:20
   },
 
   ques_text:{
-    color:'white',
+    color:'rgb(0,0,128)',
     fontSize:18,
   },
 
   options_container:{
     width:'100%',
-    backgroundColor:'green',
     paddingTop:10,
     alignItems:'center',
     justifyContent:'center',
@@ -192,7 +207,6 @@ const styles = StyleSheet.create({
   operation:{
     height:'10%',
     width:'100%',
-    backgroundColor:'red',
     flexDirection:'row',
     alignItems:'center'
   },
@@ -200,7 +214,6 @@ const styles = StyleSheet.create({
   seeker:{
     height:'100%',
     width:'60%',
-    backgroundColor:'green',
   },
 
   timer_box:{
@@ -219,7 +232,6 @@ const styles = StyleSheet.create({
   seeker_text:{
     height:'60%',
     width:'100%',
-    backgroundColor:'red',
     alignItems:'center',
     justifyContent:'center',
   },
@@ -232,8 +244,10 @@ const styles = StyleSheet.create({
   num_text:{
     height:40,
     width:40,
-    marginRight:3,
-    marginLeft:3,
+    marginRight:7,
+    marginLeft:7,
+    marginTop:3,
+    marginBottom:3,
     borderRadius:20,
     alignItems:'center',
     justifyContent:'center',
@@ -242,7 +256,7 @@ const styles = StyleSheet.create({
   operation_button:{
     height:'60%',
     width:'27%',
-    backgroundColor:'blue',
+    backgroundColor:'rgba(0,0,128,0.9)',
     marginRight:11,
     marginLeft:11,
     borderRadius:10,
@@ -267,4 +281,8 @@ const styles = StyleSheet.create({
       alignItems:'center',
   },
 
+
+
 });
+
+
