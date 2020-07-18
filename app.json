@@ -25,7 +25,7 @@
     },
     "android": {
       "package": "com.mocktestdemo",
-      "permissions":[],
+      "permissions":[]
     }
   }
 }

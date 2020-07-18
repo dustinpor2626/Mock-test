@@ -22,6 +22,17 @@ export default class App extends React.Component{
   } 
 
 
+  componentDidMount(){
+
+    fetch('https://quizapi.io/api/v1/questions?apiKey=92PC5tltF7Z2fRJDofvhZ6dQ6YvlW57PX8HBgzb3&limit=10')
+    .then(res => res.json())
+    .then(resjsn => {
+      console.log(resjsn); 
+    })
+    
+  }
+
+
   getColor = (index) => {
 
     if(this.state.selected_option_index == index)
