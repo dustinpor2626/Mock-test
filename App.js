@@ -1,35 +1,51 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity} from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity,Dimensions} from 'react-native';
 import Slider from 'react-native-slider';
 import Countdown from 'react-native-countdown-component';
+
+
+const width = Dimensions.get('screen').width;
+const height = Dimensions.get('screen').height;
 
 export default class App extends React.Component{
 
   state={
-    ques_num:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
-    selected_ques_index:0,
+    ques_num:[1,2,3,4,5,6,7,8,9,10],
     selected_option_index:10,
     current_ques_number:1,
-    jump_ques_num:21,
-    data:[
-      {
-        ques:'How many edges in a Triangle',
-        ans:'3 ',
-        options:['1','2','3','4'],
-      }
-    ]
+    jump_ques_num:20,
+    correct:0,
+    data:[],
+    options:[],
   } 
 
 
   componentDidMount(){
 
-    fetch('https://quizapi.io/api/v1/questions?apiKey=92PC5tltF7Z2fRJDofvhZ6dQ6YvlW57PX8HBgzb3&limit=10')
-    .then(res => res.json())
+    fetch('https://opentdb.com/api.php?amount=10')
+    .then(res => res.json())  
     .then(resjsn => {
-      console.log(resjsn); 
+
+      this.setState({options:resjsn.results['0'].incorrect_answers});
+      this.state.options.push(resjsn.results['0'].correct_answer);
+      this.setState({options:this.suffle(this.state.options)});
+      this.setState({data:resjsn.results});  
     })
     
+  }
+
+  suffle = (arr) => {
+
+    var i,j,temp;
+    for(i=arr.length - 1 ; i>0 ; i--){
+      j = Math.floor(Math.random()*(i+1));
+      temp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = temp;
+    }
+
+    return arr;
   }
 
 
@@ -47,7 +63,7 @@ export default class App extends React.Component{
     if(index < this.state.current_ques_number)
       return 'rgba(0,0,128,0.9)'
       else if(index == this.state.jump_ques_num)
-        return 'rgba(211,211,211,0.9)'
+        return 'rgba(211,211,211,0.8)'
         else
         return 'rgba(211,211,211,0.4)'
 
@@ -57,19 +73,55 @@ export default class App extends React.Component{
 
     if(index < this.state.current_ques_number)
       return 'white'
-      else
+      else 
       return 'blue'
 
   }
 
 
+  Next = () => {
+
+    let arr = [];
+    let ans = this.state.data[this.state.current_ques_number - 1].correct_answer;
+    let ans_selected = this.state.options[this.state.selected_option_index];
+
+    if(ans == ans_selected){
+      this.setState(pre => ({correct:pre.correct + 1}));
+    }
+
+
+    if(this.state.current_ques_number < 10){
+      this.setState(pre => ({current_ques_number:pre.current_ques_number + 1}));
+
+      setTimeout(() => {
+        this.setState({options:this.state.data[this.state.current_ques_number - 1].incorrect_answers});
+        this.state.options.push(this.state.data[this.state.current_ques_number - 1].correct_answer);
+        this.setState({options:this.suffle(this.state.options)});
+        alert(this.state.correct); 
+      },0);
+
+      this.setState({selected_option_index:10});
+    }else{
+
+      
+    }
+
+  }
+ 
+
   render(){
+
+
+  if(this.state.data.length > 0){
+
+    console.log(this.state.data[this.state.current_ques_number - 1].correct_answer);
+    
   return (
     < View style={styles.container}>
-
+      <ScrollView style={{height:height,width:width}}>
 
       <View style={styles.header} >
-            <Text style={styles.header_text}>MOCK TEST</Text>
+            <Text style={styles.header_text}>Quiz</Text>
       </View>
 
 
@@ -110,10 +162,10 @@ export default class App extends React.Component{
 
       <View style={styles.number}>
 
-<ScrollView
-horizontal={true}
-showsHorizontalScrollIndicator={false}
->
+      <ScrollView
+      horizontal={true}
+      showsHorizontalScrollIndicator={false}
+      >
         {this.state.ques_num.map((data,index) => {
           return(
             <TouchableOpacity
@@ -125,17 +177,17 @@ showsHorizontalScrollIndicator={false}
           );
         })}
 
- </ScrollView>
+       </ScrollView>
       </View>
 
       <View style={styles.ques}>
         <View style={{height:50}}><Text style={{fontSize:25,color:'rgb(0,0,128)',fontWeight:'bold'}}>Question  {this.state.current_ques_number}</Text></View>
-      <Text style={styles.ques_text}>{this.state.data[this.state.selected_ques_index].ques}</Text>
+      <Text style={styles.ques_text}>{this.state.data[this.state.current_ques_number - 1].question}</Text>
       </View>
 
 
       <View style={styles.options_container} >
-        {this.state.data[this.state.selected_ques_index].options.map((data,index) => {
+        {this.state.options.map((data,index) => {
 
           return(
 
@@ -147,32 +199,40 @@ showsHorizontalScrollIndicator={false}
             <Text style={{color:'rgba(0,0,128,1)',fontSize:20}}>{String.fromCharCode(65 + index)}.</Text>
             <View style={{marginLeft:10}}><Text style={{color:'rgba(0,0,128,0.9)',fontSize:15}}>{data}</Text></View> 
           </View>
+
           </TouchableOpacity>
-          );
-        })}
+          
+           );
+        })} 
 
       </View>
 
-      <View style={styles.operation}>
-         <TouchableOpacity style={styles.operation_button} onPress={() => alert('skip')}><View ><Text style={styles.operation_text}>SKIP ></Text></View></TouchableOpacity>
-          <TouchableOpacity style={styles.operation_button} onPress={() => alert('remark')}><View ><Text style={styles.operation_text}>REMARK</Text></View></TouchableOpacity>
-          <TouchableOpacity style={styles.operation_button} onPress={() => alert('next')}><View ><Text style={styles.operation_text}>NEXT ></Text></View></TouchableOpacity> 
-      </View>
 
-    </View>
+          <TouchableOpacity style={styles.operation_button} onPress={() => this.Next()}>
+            <Text style={styles.operation_text}>NEXT ></Text></TouchableOpacity> 
+
+    
+    </ScrollView>
+
+   </View>
+
   );
-
-  }
+      }else 
+        return null;
+      
+    }
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    width:width,
+    height:height,
   },
 
   header:{
-    height:'18%',
+    height:height*17/100,
     width:'100%',
     backgroundColor:'black',
     alignItems:'center',
@@ -193,7 +253,7 @@ const styles = StyleSheet.create({
   },
 
   number:{
-    height:'7%',
+    height:height*7/100,
     width:'100%',
     flexDirection:'row',
     alignItems:'center'
@@ -216,12 +276,6 @@ const styles = StyleSheet.create({
     justifyContent:'center',
   },
 
-  operation:{
-    height:'10%',
-    width:'100%',
-    flexDirection:'row',
-    alignItems:'center',
-  },
 
   seeker:{
     height:'100%',
@@ -267,14 +321,15 @@ const styles = StyleSheet.create({
   },
 
   operation_button:{
-    height:'60%',
-    width:'27%',
+    height:40,
+    width:100,
     backgroundColor:'rgba(0,0,128,0.9)',
     marginRight:11,
-    marginLeft:11,
+    marginLeft:width - 130,
     borderRadius:10,
     alignItems:'center',
     justifyContent:'center',
+    marginBottom:50,
   },
 
   operation_text:{
