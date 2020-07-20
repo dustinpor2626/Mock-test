@@ -1,6 +1,5 @@
-import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity,Dimensions} from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity,Dimensions,Modal, DevSettings} from 'react-native';
 import Slider from 'react-native-slider';
 import Countdown from 'react-native-countdown-component';
 
@@ -14,10 +13,11 @@ export default class App extends React.Component{
     ques_num:[1,2,3,4,5,6,7,8,9,10],
     selected_option_index:10,
     current_ques_number:1,
-    jump_ques_num:20,
+    jump_ques_num:20, 
     correct:0,
     data:[],
     options:[],
+    end:false,
   } 
 
 
@@ -30,10 +30,11 @@ export default class App extends React.Component{
       this.setState({options:resjsn.results['0'].incorrect_answers});
       this.state.options.push(resjsn.results['0'].correct_answer);
       this.setState({options:this.suffle(this.state.options)});
-      this.setState({data:resjsn.results});  
+      this.setState({data:resjsn.results});
     })
     
   }
+
 
   suffle = (arr) => {
 
@@ -81,7 +82,6 @@ export default class App extends React.Component{
 
   Next = () => {
 
-    let arr = [];
     let ans = this.state.data[this.state.current_ques_number - 1].correct_answer;
     let ans_selected = this.state.options[this.state.selected_option_index];
 
@@ -97,13 +97,11 @@ export default class App extends React.Component{
         this.setState({options:this.state.data[this.state.current_ques_number - 1].incorrect_answers});
         this.state.options.push(this.state.data[this.state.current_ques_number - 1].correct_answer);
         this.setState({options:this.suffle(this.state.options)});
-        alert(this.state.correct); 
       },0);
 
       this.setState({selected_option_index:10});
     }else{
-
-      
+        this.setState({end:true});
     }
 
   }
@@ -114,14 +112,43 @@ export default class App extends React.Component{
 
   if(this.state.data.length > 0){
 
-    console.log(this.state.data[this.state.current_ques_number - 1].correct_answer);
-    
+  var ques = this.state.data[this.state.current_ques_number - 1].question.split("&#039;").join("\'").split("&quot;").join("\"").split("&eacute;").join("e");
+
+  
+  
   return (
     < View style={styles.container}>
+      <Modal
+        visible={this.state.end}>
+
+            <View style={{height:'100%',width:'100%',backgroundColor:'wheat'}}>
+              <ScrollView>
+                    <Text style={{fontSize:40,fontWeight:'bold',marginTop:20,alignSelf:'center',marginBottom:20}}>Score   {this.state.correct}</Text>
+
+                    <View>
+                      {this.state.data.map((data,index) => {
+
+                        return(
+                          <View style={{width:95/100*width,alignSelf:'center',borderBottomColor:'gray',borderBottomWidth:1,marginBottom:5,marginTop:5,padding:5}}>
+                          <Text style={{marginBottom:5}}>Q.{index+1} {data.question.split("&#039;").join("\'").split("&quot;").join("\"").split("&eacute;").join("e")}</Text>
+                        <Text>Ans.  {data.correct_answer.split("&#039;").join("\'").split("&quot;").join("\"").split("&eacute;").join("e")}</Text>
+                      </View>
+                        )
+                      })}
+                    </View>
+
+                      <TouchableOpacity style={styles.restart} onPress={() => DevSettings.reload()}>
+                         <Text style={{alignSelf:'center',fontSize:21,fontWeight:'bold',color:'white'}}>Restart</Text>
+                      </TouchableOpacity>
+
+              </ScrollView>
+            </View>
+        </Modal>
+        
       <ScrollView style={{height:height,width:width}}>
 
       <View style={styles.header} >
-            <Text style={styles.header_text}>Quiz</Text>
+            <Text style={styles.header_text}>2-Min Quiz</Text>
       </View>
 
 
@@ -147,8 +174,8 @@ export default class App extends React.Component{
 
           <View style={styles.timer_box}>
                    <Countdown
-                    until={10*60}
-                    onFinish={() => alert('Time out')}
+                    until={2*60}
+                    onFinish={() => this.setState({end:true})}
                     timeToShow={['M','S']}
                     timeLabels={{m:'',s:''}}
                     digitStyle={{backgroundColor: ''}}
@@ -182,7 +209,7 @@ export default class App extends React.Component{
 
       <View style={styles.ques}>
         <View style={{height:50}}><Text style={{fontSize:25,color:'rgb(0,0,128)',fontWeight:'bold'}}>Question  {this.state.current_ques_number}</Text></View>
-      <Text style={styles.ques_text}>{this.state.data[this.state.current_ques_number - 1].question}</Text>
+      <Text style={styles.ques_text}>{ques}</Text>
       </View>
 
 
@@ -197,7 +224,7 @@ export default class App extends React.Component{
             >
           <View style={[styles.opt_list_container,{backgroundColor:this.getColor(index)}]}>
             <Text style={{color:'rgba(0,0,128,1)',fontSize:20}}>{String.fromCharCode(65 + index)}.</Text>
-            <View style={{marginLeft:10}}><Text style={{color:'rgba(0,0,128,0.9)',fontSize:15}}>{data}</Text></View> 
+            <View style={{marginLeft:10}}><Text style={{color:'rgba(0,0,128,0.9)',fontSize:15}}>{data.split("&#039;").join("\'").split("&quot;").join("\"").split("&eacute;").join("e")}</Text></View> 
           </View>
 
           </TouchableOpacity>
@@ -330,6 +357,14 @@ const styles = StyleSheet.create({
     alignItems:'center',
     justifyContent:'center',
     marginBottom:50,
+    shadowColor: "#000",
+    shadowOffset: {
+        width: 0,
+        height: 5,
+    },
+    elevation: 5,
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 
   operation_text:{
@@ -349,6 +384,26 @@ const styles = StyleSheet.create({
       alignItems:'center',
   },
 
+
+  restart:{
+    height:55,
+    width:210,
+    borderRadius:30,
+    alignItems:'center',
+    justifyContent:'center',
+    shadowColor: "#000",
+    shadowOffset: {
+        width: 0,
+        height: 5,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    backgroundColor:'orange',
+    alignSelf:'center',
+    marginBottom:30,
+    marginTop:20,
+},
 
 
 });
