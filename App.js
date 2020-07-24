@@ -137,7 +137,9 @@ export default class App extends React.Component{
                       })}
                     </View>
 
-                      <TouchableOpacity style={styles.restart} onPress={() => DevSettings.reload()}>
+                      <TouchableOpacity style={styles.restart} onPress={() => {
+                        this.setState({end:false})
+                        DevSettings.reload();}}>
                          <Text style={{alignSelf:'center',fontSize:21,fontWeight:'bold',color:'white'}}>Restart</Text>
                       </TouchableOpacity>
 
